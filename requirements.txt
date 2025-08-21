@@ -1,0 +1,5 @@
+streamlit
+msal
+pandas
+numpy
+# any other packages you use
