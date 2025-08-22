@@ -1,5 +1,39 @@
 import streamlit as st
+import requests
 import json
+from msal import ConfidentialClientApplication
+
+# Azure AD app details (from your App Registration)
+CLIENT_ID = "your-client-id"
+TENANT_ID = "your-tenant-id"
+CLIENT_SECRET = "your-client-secret"   # Create in Certificates & Secrets
+AUTHORITY = f"https://login.microsoftonline.com/{TENANT_ID}"
+SCOPE = ["User.Read"]   # Basic scope to read user profile
+
+# Initialize MSAL client
+app = ConfidentialClientApplication(
+    CLIENT_ID,
+    authority=AUTHORITY,
+    client_credential=CLIENT_SECRET,
+)
+
+# Get token
+result = app.acquire_token_for_client(scopes=SCOPE)
+
+if "access_token" in result:
+    access_token = result["access_token"]
+
+    # Call Microsoft Graph API (/me)
+    graph_endpoint = "https://graph.microsoft.com/v1.0/me"
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = requests.get(graph_endpoint, headers=headers)
+
+    st.write("Graph API Response:")
+    st.json(response.json())
+
+else:
+    st.error("Could not acquire token: " + str(result.get("error_description")))
+
  
 # Page title
 st.title("📩 Send a Message to MS Teams")
